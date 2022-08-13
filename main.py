@@ -2,8 +2,6 @@ from smac.env import StarCraft2Env
 from common.arguments import get_args, add_env_args
 from common.envwrapper import SubprocVecEnv
 from common.runner import Runner
-import os
-os.environ["SC2PATH"] = "/data1/gk/yangchen/StarCraftII4.6.2"
 
 
 def create_env(args):

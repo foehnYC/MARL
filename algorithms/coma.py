@@ -124,11 +124,12 @@ class Coma(object):
             q_evals = torch.gather(q_vals, dim=3, index=actions.unsqueeze(-1)).squeeze(-1)
             baseline = (actions_probs * q_targets).sum(dim=3)
 
-            td_targets = torch.cat([baseline, torch.zeros([n_episode, 1, self.n_agents], device=self.device)], dim=1)
-            td_targets = td_targets[:, 1:, :]
+            q_targets = torch.gather(q_targets, dim=3, index=actions.unsqueeze(-1)).squeeze(-1)
+            q_targets = torch.cat([q_targets, torch.zeros([n_episode, 1, self.n_agents], device=self.device)], dim=1)
+            q_targets = q_targets[:, 1:, :]
 
             reward_agent = reward.unsqueeze(dim=2).repeat(1, 1, self.n_agents)
-            td_error = torch.sum(td_targets.detach() + reward_agent - q_evals, dim=2) * (1 - mask)
+            td_error = torch.sum(q_evals - reward_agent - self.gamma * q_targets.detach(), dim=2) * (1 - mask)
             loss_critic = (td_error ** 2).sum() / (1 - mask).sum()
             train_info['loss_critic'] += loss_critic.item()
 
